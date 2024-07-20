@@ -1,4 +1,5 @@
 import createHttpError from 'http-errors';
+import mongoose from 'mongoose';
 import {
   getAllContacts,
   getContactById,
@@ -9,6 +10,8 @@ import {
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { fieldList } from '../constans/fieldList.js';
+
+const { isValidObjectId } = mongoose;
 
 export const getAllContactsController = async (req, res, next) => {
   const { page, perPage } = parsePaginationParams(req.query);
@@ -34,6 +37,12 @@ export const getAllContactsController = async (req, res, next) => {
 
 export const getContactByIdController = async (req, res, next) => {
   const { contactId } = req.params;
+
+  if (!isValidObjectId(contactId)) {
+    next(createHttpError(400, 'Invalid contact ID'));
+    return;
+  }
+
   const contact = await getContactById(contactId);
 
   if (!contact) {
@@ -62,12 +71,19 @@ export const addContactController = async (req, res, next) => {
   });
 };
 
-export const patchContactController = async (req, res) => {
+export const patchContactController = async (req, res, next) => {
   const { contactId } = req.params;
+
+  if (!isValidObjectId(contactId)) {
+    next(createHttpError(400, 'Invalid contact ID'));
+    return;
+  }
+
   const result = await updateContact({ _id: contactId }, req.body);
 
   if (!result) {
-    throw createHttpError(404, 'Contact not found');
+    next(createHttpError(404, 'Contact not found'));
+    return;
   }
 
   res.status(200).json({
@@ -77,12 +93,19 @@ export const patchContactController = async (req, res) => {
   });
 };
 
-export const deleteContactController = async (req, res) => {
+export const deleteContactController = async (req, res, next) => {
   const { contactId } = req.params;
+
+  if (!isValidObjectId(contactId)) {
+    next(createHttpError(400, 'Invalid contact ID'));
+    return;
+  }
+
   const result = await deleteContact({ _id: contactId });
 
   if (!result) {
-    throw createHttpError(404, 'Contact not found');
+    next(createHttpError(404, 'Contact not found'));
+    return;
   }
 
   res.status(204).json({
