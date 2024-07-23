@@ -11,7 +11,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "Halyna Lysun <galina.lisun88th@gmail.com>",
+  "author": "",
   "license": "ISC",
   "devDependencies": {
     "@eslint/js": "^9.4.0",
