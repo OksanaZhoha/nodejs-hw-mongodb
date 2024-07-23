@@ -13,6 +13,7 @@ import {
   contactUpdateSchema,
 } from '../validation/contacts.js';
 import { authenticate } from '../middlewares/authenticate.js';
+import { upload } from '../middlewares/upload.js';
 
 export const contactsRouter = express.Router();
 
@@ -24,12 +25,14 @@ contactsRouter.get('/:contactId', ctrlWrapper(getContactByIdController));
 
 contactsRouter.post(
   '/',
+  upload.single('photo'),
   validateBody(contactAddSchema),
   ctrlWrapper(addContactController),
 );
 
 contactsRouter.patch(
   '/:contactId',
+  upload.single('photo'),
   validateBody(contactUpdateSchema),
   ctrlWrapper(patchContactController),
 );
