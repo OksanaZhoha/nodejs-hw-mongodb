@@ -11,6 +11,9 @@ import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseContactsFilterParams } from '../utils/parseContactsFilterParams.js';
 import { fieldList } from '../constans/fieldList.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
+import { sendFileToCloud } from '../utils/sendFileToCloud.js';
+import { env } from '../utils/env.js';
 
 const { isValidObjectId } = mongoose;
 
@@ -68,7 +71,18 @@ export const getContactByIdController = async (req, res, next) => {
 
 export const addContactController = async (req, res, next) => {
   const { _id: userId } = req.user;
-  const contact = await addContact({ ...req.body, userId });
+
+  let photo = '';
+
+  if (req.file) {
+    if (env('ENABLE_CLOUDINARY') === 'true') {
+      photo = await sendFileToCloud(req.file, 'photo');
+    } else {
+      photo = await saveFileToUploadDir(req.file, 'photo');
+    }
+  }
+
+  const contact = await addContact({ ...req.body, userId, photo });
 
   if (!contact) {
     next(createHttpError(404, 'Contact not added'));
@@ -84,6 +98,17 @@ export const addContactController = async (req, res, next) => {
 
 export const patchContactController = async (req, res, next) => {
   const userId = req.user._id;
+
+  let photo = '';
+
+  if (req.file) {
+    if (env('ENABLE_CLOUDINARY') === 'true') {
+      photo = await sendFileToCloud(req.file, 'photo');
+    } else {
+      photo = await saveFileToUploadDir(req.file, 'photo');
+    }
+  }
+
   const { contactId } = req.params;
 
   if (!isValidObjectId(contactId)) {
@@ -91,7 +116,10 @@ export const patchContactController = async (req, res, next) => {
     return;
   }
 
-  const result = await updateContact({ _id: contactId, userId }, req.body);
+  const result = await updateContact(
+    { _id: contactId, userId },
+    { ...req.body, photo },
+  );
 
   if (!result) {
     throw createHttpError(404, 'Contact not found');
