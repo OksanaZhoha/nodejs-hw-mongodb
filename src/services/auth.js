@@ -31,7 +31,7 @@ export const requestResetToken = async (email) => {
       email,
     },
     env('JWT_SECRET'),
-    { expiresIn: '72h' },
+    { expiresIn: '15m' },
   );
 
   const appDomain = env('APP_DOMAIN');
