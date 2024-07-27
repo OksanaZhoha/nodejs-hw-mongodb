@@ -9,6 +9,7 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { authRouter } from './routers/auth.js';
 import { PUBLIC_DIR } from './constans/uploadFiles.js';
+import { swaggerDocs } from './middlewares/swaggerDocs.js';
 
 const port = env('PORT', '3000');
 
@@ -30,6 +31,7 @@ export const setupServer = () => {
 
   app.use('/contacts', contactsRouter);
   app.use('/auth', authRouter);
+  app.use('/api-docs', swaggerDocs());
 
   app.use(notFoundHandler);
   app.use(errorHandler);
